@@ -3,9 +3,10 @@ package slackbot
 import (
 	"regexp"
 
-	"golang.org/x/net/context"
+	"context"
 )
 
+// Route represents a route
 type Route struct {
 	handler      Handler
 	err          error
@@ -28,6 +29,7 @@ type RouteMatch struct {
 	Handler Handler
 }
 
+// Match matches
 func (r *Route) Match(ctx context.Context, match *RouteMatch) (bool, context.Context) {
 	if r.preprocessor != nil {
 		ctx = r.preprocessor(ctx)
@@ -69,6 +71,7 @@ func (r *Route) Handler(handler Handler) *Route {
 	return r
 }
 
+// MessageHandler is a message handler
 func (r *Route) MessageHandler(fn MessageHandler) *Route {
 	return r.Handler(func(ctx context.Context) {
 		bot := BotFromContext(ctx)
@@ -77,6 +80,7 @@ func (r *Route) MessageHandler(fn MessageHandler) *Route {
 	})
 }
 
+// Preprocess preproccesses
 func (r *Route) Preprocess(fn Preprocessor) *Route {
 	if r.err == nil {
 		r.preprocessor = fn
@@ -84,6 +88,7 @@ func (r *Route) Preprocess(fn Preprocessor) *Route {
 	return r
 }
 
+// SubRouter creates a subrouter
 func (r *Route) Subrouter() Router {
 	if r.err == nil {
 		r.subrouter = &SimpleRouter{}
@@ -91,7 +96,7 @@ func (r *Route) Subrouter() Router {
 	return r.subrouter
 }
 
-// addMatcher adds a matcher to the route.
+// AddMatcher adds a matcher to the route.
 func (r *Route) AddMatcher(m Matcher) *Route {
 	if r.err == nil {
 		r.matchers = append(r.matchers, m)
@@ -102,12 +107,13 @@ func (r *Route) AddMatcher(m Matcher) *Route {
 // ============================================================================
 // Regex Type Matcher
 // ============================================================================
-
+// RegexpMatcher is a regexp matcher
 type RegexpMatcher struct {
 	regex     string
 	botUserID string
 }
 
+// Match matches
 func (rm *RegexpMatcher) Match(ctx context.Context) (bool, context.Context) {
 	msg := MessageFromContext(ctx)
 	// A message be receded by a direct mention. For simplicity sake, strip out any potention direct mentions first
@@ -117,6 +123,7 @@ func (rm *RegexpMatcher) Match(ctx context.Context) (bool, context.Context) {
 	return matched, ctx
 }
 
+// SetBotID sets the bot id
 func (rm *RegexpMatcher) SetBotID(botID string) {
 	rm.botUserID = botID
 }
@@ -134,12 +141,13 @@ func (r *Route) addRegexpMatcher(regex string) error {
 // ============================================================================
 // Message Type Matcher
 // ============================================================================
-
+// TypesMatcher is a type matcher
 type TypesMatcher struct {
 	types     []MessageType
 	botUserID string
 }
 
+// Match matches
 func (tm *TypesMatcher) Match(ctx context.Context) (bool, context.Context) {
 	msg := MessageFromContext(ctx)
 	for _, t := range tm.types {
@@ -157,11 +165,12 @@ func (tm *TypesMatcher) Match(ctx context.Context) (bool, context.Context) {
 	return false, ctx
 }
 
+// SetBotID sets the botid
 func (tm *TypesMatcher) SetBotID(botID string) {
 	tm.botUserID = botID
 }
 
-// addRegexpMatcher adds a host or path matcher and builder to a route.
+// addTypesMatcher adds a host or path matcher and builder to a route.
 func (r *Route) addTypesMatcher(types ...MessageType) error {
 	if r.err != nil {
 		return r.err

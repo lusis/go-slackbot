@@ -1,8 +1,9 @@
 package slackbot
 
 import (
+	"context"
+
 	"github.com/nlopes/slack"
-	"golang.org/x/net/context"
 )
 
 const (
@@ -10,6 +11,7 @@ const (
 	MESSAGE_CONTEXT = "__MESSAGE_CONTEXT__"
 )
 
+// BotFromContext creates a Bot from provided Context
 func BotFromContext(ctx context.Context) *Bot {
 	if result, ok := ctx.Value(BOT_CONTEXT).(*Bot); ok {
 		return result

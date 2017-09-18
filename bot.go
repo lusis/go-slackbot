@@ -39,13 +39,15 @@ import (
 	"fmt"
 	"time"
 
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/nlopes/slack"
 )
 
 const (
-	WithTyping    bool = true
+	// WithTyping sends a message with typing indicator
+	WithTyping bool = true
+	// WithoutTyping sends a message without typing indicator
 	WithoutTyping bool = false
 
 	maxTypingSleepMs time.Duration = time.Millisecond * 2000
@@ -57,6 +59,7 @@ func New(slackToken string) *Bot {
 	return b
 }
 
+// Bot is a bot
 type Bot struct {
 	SimpleRouter
 	// Routes to be matched, in order.
@@ -137,7 +140,7 @@ func (b *Bot) Type(evt *slack.MessageEvent, msg interface{}) {
 	time.Sleep(sleepDuration)
 }
 
-// Fetch the botUserID.
+// BotUserID fetches the botUserID.
 func (b *Bot) BotUserID() string {
 	return b.botUserID
 }
