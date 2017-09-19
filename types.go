@@ -39,3 +39,11 @@ type Matcher interface {
 type NamedCaptures struct {
 	m map[string]string
 }
+
+func (nc NamedCaptures) Get(key string) string {
+	v, ok := nc.m[key]
+	if !ok {
+		return ""
+	}
+	return v
+}
