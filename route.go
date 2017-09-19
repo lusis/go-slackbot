@@ -134,10 +134,9 @@ func (rm *RegexpMatcher) Match(ctx context.Context) (bool, context.Context) {
 	if !matched {
 		return false, ctx
 	}
-	for k, v := range matches {
-		ctx = context.WithValue(ctx, contextKey(k), v)
-	}
-	return true, ctx
+	newCtx := context.WithValue(ctx, contextKey("captured_groups"), matches)
+
+	return true, newCtx
 }
 
 // SetBotID sets the bot id
