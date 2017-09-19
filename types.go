@@ -40,6 +40,7 @@ type NamedCaptures struct {
 	m map[string]string
 }
 
+// Get returns a value from a key lookup
 func (nc NamedCaptures) Get(key string) string {
 	v, ok := nc.m[key]
 	if !ok {

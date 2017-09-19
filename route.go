@@ -135,6 +135,7 @@ func (rm *RegexpMatcher) Match(ctx context.Context) (bool, context.Context) {
 		return false, ctx
 	}
 	var namedCaptures = NamedCaptures{}
+	namedCaptures.m = make(map[string]string)
 	for k, v := range matches {
 		namedCaptures.m[k] = v
 	}
