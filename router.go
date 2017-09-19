@@ -1,6 +1,6 @@
 package slackbot
 
-import "golang.org/x/net/context"
+import "context"
 
 // Router represents a router
 type Router interface {
