@@ -50,7 +50,7 @@ const (
 	// WithoutTyping sends a message without typing indicator
 	WithoutTyping bool = false
 
-	maxTypingSleepMs time.Duration = time.Millisecond * 2000
+	maxTypingSleep time.Duration = time.Millisecond * 2000
 )
 
 // New constructs a new Bot using the slackToken to authorize against the Slack service.
@@ -124,7 +124,7 @@ func (b *Bot) ReplyWithAttachments(evt *slack.MessageEvent, attachments []slack.
 	params := slack.PostMessageParameters{AsUser: true}
 	params.Attachments = attachments
 
-	b.Client.PostMessage(evt.Msg.Channel, "", params)
+	_, _, _ = b.Client.PostMessage(evt.Msg.Channel, "", params)
 }
 
 // Type sends a typing message and simulates delay (max 2000ms) based on message size.
@@ -132,8 +132,8 @@ func (b *Bot) Type(evt *slack.MessageEvent, msg interface{}) {
 	msgLen := msgLen(msg)
 
 	sleepDuration := time.Minute * time.Duration(msgLen) / 3000
-	if sleepDuration > maxTypingSleepMs {
-		sleepDuration = maxTypingSleepMs
+	if sleepDuration > maxTypingSleep {
+		sleepDuration = maxTypingSleep
 	}
 
 	b.RTM.SendMessage(b.RTM.NewTypingMessage(evt.Channel))

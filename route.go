@@ -6,6 +6,12 @@ import (
 	"context"
 )
 
+type contextKey string
+
+func (c contextKey) String() string {
+	return string(c)
+}
+
 // Route represents a route
 type Route struct {
 	handler      Handler
@@ -58,6 +64,13 @@ func (r *Route) Hear(regex string) *Route {
 	return r
 }
 
+// HearWithCaptures adds a matcher for the message text with regexp named captures in context
+func (r *Route) HearWithCaptures(regex string) *Route {
+	r.err = r.addRegexpMatcher(regex)
+	return r
+}
+
+// Messages sets the types of Messages we want to handle
 func (r *Route) Messages(types ...MessageType) *Route {
 	r.addTypesMatcher(types...)
 	return r
@@ -88,7 +101,7 @@ func (r *Route) Preprocess(fn Preprocessor) *Route {
 	return r
 }
 
-// SubRouter creates a subrouter
+// Subrouter creates a subrouter
 func (r *Route) Subrouter() Router {
 	if r.err == nil {
 		r.subrouter = &SimpleRouter{}
@@ -104,23 +117,27 @@ func (r *Route) AddMatcher(m Matcher) *Route {
 	return r
 }
 
-// ============================================================================
-// Regex Type Matcher
-// ============================================================================
 // RegexpMatcher is a regexp matcher
 type RegexpMatcher struct {
 	regex     string
 	botUserID string
 }
 
-// Match matches
+// Match matches a message
 func (rm *RegexpMatcher) Match(ctx context.Context) (bool, context.Context) {
 	msg := MessageFromContext(ctx)
 	// A message be receded by a direct mention. For simplicity sake, strip out any potention direct mentions first
 	text := StripDirectMention(msg.Text)
 	// now consider stripped text against regular expression
-	matched := regexp.MustCompile(rm.regex).MatchString(text)
-	return matched, ctx
+	re := regexp.MustCompile(rm.regex)
+	matched, matches := namedRegexpParse(text, re)
+	if !matched {
+		return false, ctx
+	}
+	for k, v := range matches {
+		ctx = context.WithValue(ctx, contextKey(k), v)
+	}
+	return true, ctx
 }
 
 // SetBotID sets the bot id
@@ -138,9 +155,6 @@ func (r *Route) addRegexpMatcher(regex string) error {
 	return nil
 }
 
-// ============================================================================
-// Message Type Matcher
-// ============================================================================
 // TypesMatcher is a type matcher
 type TypesMatcher struct {
 	types     []MessageType

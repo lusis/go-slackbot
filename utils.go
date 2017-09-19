@@ -48,3 +48,20 @@ func WhoMentioned(evt *slack.MessageEvent) []string {
 	}
 	return matches
 }
+
+func namedRegexpParse(message string, exp *regexp.Regexp) (bool, map[string]string) {
+	md := make(map[string]string)
+	allMatches := exp.FindStringSubmatch(message)
+	if len(allMatches) == 0 {
+		return false, md
+	}
+	keys := exp.SubexpNames()
+	if len(keys) != 0 {
+		for i, name := range keys {
+			if i != 0 {
+				md[name] = allMatches[1]
+			}
+		}
+	}
+	return true, md
+}
