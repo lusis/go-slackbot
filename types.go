@@ -34,3 +34,8 @@ type Matcher interface {
 	Match(context.Context) (bool, context.Context)
 	SetBotID(botID string)
 }
+
+// NamedCaptures is a container for any named captures in our context
+type NamedCaptures struct {
+	m map[string]string
+}

@@ -134,7 +134,11 @@ func (rm *RegexpMatcher) Match(ctx context.Context) (bool, context.Context) {
 	if !matched {
 		return false, ctx
 	}
-	newCtx := context.WithValue(ctx, contextKey("captured_groups"), matches)
+	var namedCaptures = NamedCaptures{}
+	for k, v := range matches {
+		namedCaptures.m[k] = v
+	}
+	newCtx := context.WithValue(ctx, contextKey(NamedCaptureContextKey), namedCaptures)
 
 	return true, newCtx
 }

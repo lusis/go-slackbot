@@ -9,6 +9,8 @@ import (
 const (
 	BOT_CONTEXT     = "__BOT_CONTEXT__"
 	MESSAGE_CONTEXT = "__MESSAGE_CONTEXT__"
+	// NamedCaptureContextKey is the key for named captures
+	NamedCaptureContextKey = "__NAMED_CAPTURES__"
 )
 
 // BotFromContext creates a Bot from provided Context
@@ -34,4 +36,9 @@ func MessageFromContext(ctx context.Context) *slack.MessageEvent {
 // AddMessageToContext sets the Slack message event reference in context and returns the newly derived context
 func AddMessageToContext(ctx context.Context, msg *slack.MessageEvent) context.Context {
 	return context.WithValue(ctx, MESSAGE_CONTEXT, msg)
+}
+
+// NamedCapturesFromContext returns any NamedCaptures parsed from regexp
+func NamedCapturesFromContext(ctx context.Context) NamedCaptures {
+	return ctx.Value(NamedCaptureContextKey).(NamedCaptures)
 }
