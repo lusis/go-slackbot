@@ -90,10 +90,10 @@ func (b *Bot) Run() {
 				continue
 			}
 
-			newCtx := AddMessageToContext(ctx, ev)
+			ctx = AddMessageToContext(ctx, ev)
 			var match RouteMatch
-			if matched, nextCtx := b.Match(newCtx, &match); matched {
-				match.Handler(nextCtx)
+			if matched, newCtx := b.Match(ctx, &match); matched {
+				match.Handler(newCtx)
 			}
 
 		case *slack.RTMError:

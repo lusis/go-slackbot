@@ -2,6 +2,7 @@ package slackbot
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/nlopes/slack"
 )
@@ -17,9 +18,10 @@ const (
 
 // BotFromContext creates a Bot from provided Context
 func BotFromContext(ctx context.Context) *Bot {
-	if result, ok := ctx.Value(BotContext).(*Bot); ok {
+	if result, ok := ctx.Value(contextKey(BotContext)).(*Bot); ok {
 		return result
 	}
+	fmt.Printf("Got a nil bot from context: %#v\n", ctx)
 	return nil
 }
 
@@ -30,7 +32,7 @@ func AddBotToContext(ctx context.Context, bot *Bot) context.Context {
 
 // MessageFromContext gets the message from the provided context
 func MessageFromContext(ctx context.Context) *slack.MessageEvent {
-	if result, ok := ctx.Value(MessageContext).(*slack.MessageEvent); ok {
+	if result, ok := ctx.Value(contextKey(MessageContext)).(*slack.MessageEvent); ok {
 		return result
 	}
 	return nil
@@ -43,5 +45,8 @@ func AddMessageToContext(ctx context.Context, msg *slack.MessageEvent) context.C
 
 // NamedCapturesFromContext returns any NamedCaptures parsed from regexp
 func NamedCapturesFromContext(ctx context.Context) NamedCaptures {
-	return ctx.Value(NamedCaptureContextKey).(NamedCaptures)
+	if result, ok := ctx.Value(contextKey(NamedCaptureContextKey)).(NamedCaptures); ok {
+		return result
+	}
+	return NamedCaptures{}
 }
