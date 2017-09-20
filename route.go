@@ -4,6 +4,8 @@ import (
 	"regexp"
 
 	"context"
+
+	slack "github.com/nlopes/slack"
 )
 
 type contextKey string
@@ -35,6 +37,21 @@ type RouteMatch struct {
 	Handler Handler
 }
 
+// EventMatch stores information about a matched event
+type EventMatch struct {
+	Handler EventHandler
+}
+
+// ChannelJoinMatch stores information about a channel joined event
+type ChannelJoinMatch struct {
+	Handler ChannelJoinHandler
+}
+
+// Handle calls the handler with provided parameters
+func (cjm *ChannelJoinMatch) Handle(ctx context.Context, b *Bot, channel *slack.Channel) {
+	cjm.Handler(ctx, b, channel)
+}
+
 // Match matches
 func (r *Route) Match(ctx context.Context, match *RouteMatch) (bool, context.Context) {
 	if r.preprocessor != nil {
@@ -60,12 +77,6 @@ func (r *Route) Match(ctx context.Context, match *RouteMatch) (bool, context.Con
 
 // Hear adds a matcher for the message text
 func (r *Route) Hear(regex string) *Route {
-	r.err = r.addRegexpMatcher(regex)
-	return r
-}
-
-// HearWithCaptures adds a matcher for the message text with regexp named captures in context
-func (r *Route) HearWithCaptures(regex string) *Route {
 	r.err = r.addRegexpMatcher(regex)
 	return r
 }

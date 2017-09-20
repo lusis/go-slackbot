@@ -64,6 +64,10 @@ type Bot struct {
 	SimpleRouter
 	// Routes to be matched, in order.
 	routes []*Route
+	// unhandledEventsHandlers are event handlers for unknown events
+	unhandledEventsHandlers []EventHandler
+	// channelJoinEventsHandlers are event handlers for channel join events
+	channelJoinEventsHandlers []ChannelJoinHandler
 	// Slack UserID of the bot UserID
 	botUserID string
 	// Slack API
@@ -82,7 +86,6 @@ func (b *Bot) Run() {
 		ctx = AddBotToContext(ctx, b)
 		switch ev := msg.Data.(type) {
 		case *slack.ConnectedEvent:
-			fmt.Printf("Connected: %#v\n", ev.Info.User)
 			b.setBotID(ev.Info.User.ID)
 		case *slack.MessageEvent:
 			// ignore messages from the current user, the bot user
@@ -95,7 +98,14 @@ func (b *Bot) Run() {
 			if matched, newCtx := b.Match(ctx, &match); matched {
 				match.Handler(newCtx)
 			}
-
+		case *slack.ChannelJoinedEvent:
+			if len(b.channelJoinEventsHandlers) > 0 {
+				for _, h := range b.channelJoinEventsHandlers {
+					var handler ChannelJoinMatch
+					handler.Handler = h
+					go handler.Handle(ctx, b, &ev.Channel)
+				}
+			}
 		case *slack.RTMError:
 			fmt.Printf("Error: %s\n", ev.Error())
 
@@ -107,6 +117,11 @@ func (b *Bot) Run() {
 		}
 		//}
 	}
+}
+
+// OnChannelJoin handles ChannelJoin events
+func (b *Bot) OnChannelJoin(h ChannelJoinHandler) {
+	b.channelJoinEventsHandlers = append(b.channelJoinEventsHandlers, h)
 }
 
 // Reply replies to a message event with a simple message.

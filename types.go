@@ -23,6 +23,12 @@ const (
 // Handler is a handler
 type Handler func(context.Context)
 
+// ChannelJoinHandler handles channel join events
+type ChannelJoinHandler func(context.Context, *Bot, *slack.Channel)
+
+// EventHandler handles events in a generic fashion
+type EventHandler func(context.Context, *Bot, *slack.Event)
+
 // MessageHandler is a message handler
 type MessageHandler func(ctx context.Context, bot *Bot, msg *slack.MessageEvent)
 
