@@ -75,39 +75,37 @@ type Bot struct {
 func (b *Bot) Run() {
 	b.RTM = b.Client.NewRTM()
 	go b.RTM.ManageConnection()
-	for {
-		select {
-		case msg := <-b.RTM.IncomingEvents:
-			ctx := context.Background()
-			ctx = AddBotToContext(ctx, b)
-			switch ev := msg.Data.(type) {
-			case *slack.ConnectedEvent:
-				fmt.Printf("Connected: %#v\n", ev.Info.User)
-				b.setBotID(ev.Info.User.ID)
-			case *slack.MessageEvent:
-				// ignore messages from the current user, the bot user
-				if b.botUserID == ev.User {
-					continue
-				}
-
-				ctx = AddMessageToContext(ctx, ev)
-				var match RouteMatch
-				if matched, ctx := b.Match(ctx, &match); matched {
-					match.Handler(ctx)
-				}
-
-			case *slack.RTMError:
-				fmt.Printf("Error: %s\n", ev.Error())
-
-			case *slack.InvalidAuthEvent:
-				fmt.Printf("Invalid credentials")
-				break
-
-			default:
-				// Ignore other events..
-				// fmt.Printf("Unexpected: %v\n", msg.Data)
+	for msg := range b.RTM.IncomingEvents {
+		//select {
+		//case msg := <-b.RTM.IncomingEvents:
+		ctx := context.Background()
+		ctx = AddBotToContext(ctx, b)
+		switch ev := msg.Data.(type) {
+		case *slack.ConnectedEvent:
+			fmt.Printf("Connected: %#v\n", ev.Info.User)
+			b.setBotID(ev.Info.User.ID)
+		case *slack.MessageEvent:
+			// ignore messages from the current user, the bot user
+			if b.botUserID == ev.User {
+				continue
 			}
+
+			newCtx := AddMessageToContext(ctx, ev)
+			var match RouteMatch
+			if matched, nextCtx := b.Match(newCtx, &match); matched {
+				match.Handler(nextCtx)
+			}
+
+		case *slack.RTMError:
+			fmt.Printf("Error: %s\n", ev.Error())
+
+		case *slack.InvalidAuthEvent:
+			fmt.Printf("Invalid credentials")
+		default:
+			// Ignore other events..
+			// fmt.Printf("Unexpected: %v\n", msg.Data)
 		}
+		//}
 	}
 }
 

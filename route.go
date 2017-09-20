@@ -72,7 +72,7 @@ func (r *Route) HearWithCaptures(regex string) *Route {
 
 // Messages sets the types of Messages we want to handle
 func (r *Route) Messages(types ...MessageType) *Route {
-	r.addTypesMatcher(types...)
+	_ = r.addTypesMatcher(types...)
 	return r
 }
 

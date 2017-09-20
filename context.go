@@ -7,15 +7,17 @@ import (
 )
 
 const (
-	BOT_CONTEXT     = "__BOT_CONTEXT__"
-	MESSAGE_CONTEXT = "__MESSAGE_CONTEXT__"
+	// BotContext is the context key for the bot context entry
+	BotContext = "__BOT_CONTEXT__"
+	// MessageContext is the context key for the message context entry
+	MessageContext = "__MESSAGE_CONTEXT__"
 	// NamedCaptureContextKey is the key for named captures
 	NamedCaptureContextKey = "__NAMED_CAPTURES__"
 )
 
 // BotFromContext creates a Bot from provided Context
 func BotFromContext(ctx context.Context) *Bot {
-	if result, ok := ctx.Value(BOT_CONTEXT).(*Bot); ok {
+	if result, ok := ctx.Value(BotContext).(*Bot); ok {
 		return result
 	}
 	return nil
@@ -23,11 +25,12 @@ func BotFromContext(ctx context.Context) *Bot {
 
 // AddBotToContext sets the bot reference in context and returns the newly derived context
 func AddBotToContext(ctx context.Context, bot *Bot) context.Context {
-	return context.WithValue(ctx, BOT_CONTEXT, bot)
+	return context.WithValue(ctx, contextKey(BotContext), bot)
 }
 
+// MessageFromContext gets the message from the provided context
 func MessageFromContext(ctx context.Context) *slack.MessageEvent {
-	if result, ok := ctx.Value(MESSAGE_CONTEXT).(*slack.MessageEvent); ok {
+	if result, ok := ctx.Value(MessageContext).(*slack.MessageEvent); ok {
 		return result
 	}
 	return nil
@@ -35,7 +38,7 @@ func MessageFromContext(ctx context.Context) *slack.MessageEvent {
 
 // AddMessageToContext sets the Slack message event reference in context and returns the newly derived context
 func AddMessageToContext(ctx context.Context, msg *slack.MessageEvent) context.Context {
-	return context.WithValue(ctx, MESSAGE_CONTEXT, msg)
+	return context.WithValue(ctx, contextKey(MessageContext), msg)
 }
 
 // NamedCapturesFromContext returns any NamedCaptures parsed from regexp
