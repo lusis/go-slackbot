@@ -106,6 +106,14 @@ func (b *Bot) Run() {
 					go handler.Handle(ctx, b, &ev.Channel)
 				}
 			}
+		case *slack.GroupJoinedEvent:
+			if len(b.channelJoinEventsHandlers) > 0 {
+				for _, h := range b.channelJoinEventsHandlers {
+					var handler ChannelJoinMatch
+					handler.Handler = h
+					go handler.Handle(ctx, b, &ev.Channel)
+				}
+			}
 		case *slack.RTMError:
 			fmt.Printf("Error: %s\n", ev.Error())
 
