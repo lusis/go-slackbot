@@ -59,7 +59,7 @@ func namedRegexpParse(message string, exp *regexp.Regexp) (bool, map[string]stri
 	if len(keys) != 0 {
 		for i, name := range keys {
 			if i != 0 {
-				md[name] = allMatches[1]
+				md[name] = allMatches[i]
 			}
 		}
 	}
