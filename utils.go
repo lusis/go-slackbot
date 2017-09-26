@@ -44,7 +44,24 @@ func WhoMentioned(evt *slack.MessageEvent) []string {
 	results := regexp.MustCompile(`<@([a-zA-z0-9]+)>`).FindAllStringSubmatch(evt.Text, -1)
 	matches := make([]string, len(results))
 	for i, r := range results {
-		matches[i] = r[1]
+		matches[i] = r[i]
 	}
 	return matches
+}
+
+func namedRegexpParse(message string, exp *regexp.Regexp) (bool, map[string]string) {
+	md := make(map[string]string)
+	allMatches := exp.FindStringSubmatch(message)
+	if len(allMatches) == 0 {
+		return false, md
+	}
+	keys := exp.SubexpNames()
+	if len(keys) != 0 {
+		for i, name := range keys {
+			if i != 0 {
+				md[name] = allMatches[i]
+			}
+		}
+	}
+	return true, md
 }

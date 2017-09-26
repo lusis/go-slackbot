@@ -1,7 +1,8 @@
 package slackbot
 
-import "golang.org/x/net/context"
+import "context"
 
+// Router represents a router
 type Router interface {
 	Match(context.Context, *RouteMatch) (bool, context.Context)
 	NewRoute() *Route
@@ -13,6 +14,7 @@ type Router interface {
 	SetBotID(botID string)
 }
 
+// SimpleRouter represents a simple router
 type SimpleRouter struct {
 	// Routes to be matched, in order.
 	routes []*Route
@@ -39,26 +41,32 @@ func (r *SimpleRouter) NewRoute() *Route {
 	return route
 }
 
+// Hear hears
 func (r *SimpleRouter) Hear(regex string) *Route {
 	return r.NewRoute().Hear(regex)
 }
 
+// Handler handles
 func (r *SimpleRouter) Handler(handler Handler) *Route {
 	return r.NewRoute().Handler(handler)
 }
 
+// MessageHandler is a message handler
 func (r *SimpleRouter) MessageHandler(handler MessageHandler) *Route {
 	return r.NewRoute().MessageHandler(handler)
 }
 
+// Messages is for messages
 func (r *SimpleRouter) Messages(types ...MessageType) *Route {
 	return r.NewRoute().Messages(types...)
 }
 
+// AddMatcher adds a matcher
 func (r *SimpleRouter) AddMatcher(m Matcher) *Route {
 	return r.NewRoute().AddMatcher(m)
 }
 
+// SetBotID sets the bot id
 func (r *SimpleRouter) SetBotID(botID string) {
 	r.botUserID = botID
 	for _, route := range r.routes {

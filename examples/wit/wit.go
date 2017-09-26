@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"golang.org/x/net/context"
+	"context"
 
-	slackbot "github.com/adampointer/go-slackbot"
 	"github.com/chris-skud/go-wit"
+	slackbot "github.com/lusis/go-slackbot"
 	"github.com/nlopes/slack"
 )
 
