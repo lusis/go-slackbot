@@ -120,8 +120,13 @@ func (b *Bot) Run() {
 		case *slack.InvalidAuthEvent:
 			fmt.Printf("Invalid credentials")
 		default:
-			// Ignore other events..
-			// fmt.Printf("Unexpected: %v\n", msg.Data)
+			if len(b.unhandledEventsHandlers) > 0 {
+				for _, h := range b.unhandledEventsHandlers {
+					var handler EventMatch
+					handler.Handler = h
+					go handler.Handle(ctx, b, &msg)
+				}
+			}
 		}
 		//}
 	}

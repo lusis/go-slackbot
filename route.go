@@ -52,6 +52,10 @@ func (cjm *ChannelJoinMatch) Handle(ctx context.Context, b *Bot, channel *slack.
 	cjm.Handler(ctx, b, channel)
 }
 
+func (em *EventMatch) Handle(ctx context.Context, b *Bot, ev *slack.RTMEvent) {
+	em.Handler(ctx, b, ev)
+}
+
 // Match matches
 func (r *Route) Match(ctx context.Context, match *RouteMatch) (bool, context.Context) {
 	if r.preprocessor != nil {
