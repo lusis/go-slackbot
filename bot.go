@@ -132,6 +132,11 @@ func (b *Bot) Run() {
 	}
 }
 
+// OnUnhandledEvent handles any events not already handled
+func (b *Bot) OnUnhandledEvent(h EventHandler) {
+	b.unhandledEventsHandlers = append(b.unhandledEventsHandlers, h)
+}
+
 // OnChannelJoin handles ChannelJoin events
 func (b *Bot) OnChannelJoin(h ChannelJoinHandler) {
 	b.channelJoinEventsHandlers = append(b.channelJoinEventsHandlers, h)
