@@ -47,7 +47,7 @@ func IsMentioned(evt *slack.MessageEvent, userID string) bool {
 
 // IsMention returns true the message contains a mention
 func IsMention(evt *slack.MessageEvent) bool {
-	r, rErr := regexp.Compile(`<@([a-zA-z0-9]+)?>`)
+	r, rErr := regexp.Compile(`<@(U[a-zA-Z0-9]+)>`)
 	if rErr != nil {
 		return false
 	}
@@ -57,14 +57,14 @@ func IsMention(evt *slack.MessageEvent) bool {
 
 // WhoMentioned returns a list of userIDs mentioned in the message
 func WhoMentioned(evt *slack.MessageEvent) []string {
-	r, rErr := regexp.Compile(`<@([a-zA-z0-9]+)>`)
+	r, rErr := regexp.Compile(`<@(U[a-zA-Z0-9]+)>`)
 	if rErr != nil {
 		return []string{}
 	}
 	results := r.FindAllStringSubmatch(evt.Text, -1)
 	matches := make([]string, len(results))
-	for i, r := range results {
-		matches[i] = r[i]
+	for i, r := range results { // nolint: gosimple
+		matches[i] = r[1]
 	}
 	return matches
 }

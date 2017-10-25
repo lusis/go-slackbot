@@ -52,6 +52,7 @@ func (cjm *ChannelJoinMatch) Handle(ctx context.Context, b *Bot, channel *slack.
 	cjm.Handler(ctx, b, channel)
 }
 
+// Handle handles any unspecified RTM events
 func (em *EventMatch) Handle(ctx context.Context, b *Bot, ev *slack.RTMEvent) {
 	em.Handler(ctx, b, ev)
 }
