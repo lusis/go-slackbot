@@ -32,11 +32,11 @@
 // 	}
 //
 //
-// Project home and samples: https://github.com/BeepBoopHQ/go-slackbot
 package slackbot
 
 import (
 	"fmt"
+	"io/ioutil"
 	"time"
 
 	"context"
@@ -54,17 +54,56 @@ const (
 	maxTypingSleep time.Duration = time.Millisecond * 2000
 )
 
+// BotOption is a functional option for configuring the bot
+type BotOption func(*Bot) error
+
+// WithLogger sets the logger to use
+func WithLogger(l *log.Logger) BotOption {
+	return func(b *Bot) error {
+		b.SetLogger(l)
+		return nil
+	}
+}
+
+// WithClient sets a custom slack client to use
+func WithClient(c *slack.Client) BotOption {
+	return func(b *Bot) error {
+		b.Client = c
+		return nil
+	}
+}
+
+// NewWithOpts creates a new bot with options
+func NewWithOpts(opts ...BotOption) (*Bot, error) {
+	b := &Bot{}
+	for _, opt := range opts {
+		err := opt(b)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if b.logger == nil {
+		b.logger = log.New(ioutil.Discard, "slackbot - ", 1)
+	}
+	return b, nil
+}
+
 // New constructs a new Bot using the slackToken to authorize against the Slack service.
 func New(slackToken string) *Bot {
-	b := &Bot{Client: slack.New(slackToken)}
+	fmt.Println("New is deprecated. Please migrate to using NewWithOpts")
+	b, err := NewWithOpts(WithClient(slack.New(slackToken)))
+	if err != nil {
+		b.logger.Panicf("error creating bot: %s", err.Error())
+	}
 	return b
 }
 
 // NewWithLogger constructs a new Bot using the slackToken and custom logger instance provided
 func NewWithLogger(slackToken string, l *log.Logger) *Bot {
-	b := &Bot{
-		Client: slack.New(slackToken),
-		logger: l,
+	fmt.Println("NewWithLogger is deprecated. Please migrate to using NewWithOpts")
+	b, err := NewWithOpts(WithLogger(l), WithClient(slack.New(slackToken)))
+	if err != nil {
+		b.logger.Panicf("error creating bot: %s", err.Error())
 	}
 	return b
 }
@@ -90,10 +129,9 @@ type Bot struct {
 // Run listens for incoming slack RTM events, matching them to an appropriate handler.
 func (b *Bot) Run() {
 	b.RTM = b.Client.NewRTM()
+	//slack.SetLogger(b.logger)
 	go b.RTM.ManageConnection()
 	for msg := range b.RTM.IncomingEvents {
-		//select {
-		//case msg := <-b.RTM.IncomingEvents:
 		ctx := context.Background()
 		ctx = AddBotToContext(ctx, b)
 		switch ev := msg.Data.(type) {
@@ -128,7 +166,6 @@ func (b *Bot) Run() {
 			}
 		case *slack.RTMError:
 			b.logger.Print(ev.Error())
-
 		case *slack.InvalidAuthEvent:
 			b.logger.Print("Invalid credentials")
 		default:
@@ -144,7 +181,7 @@ func (b *Bot) Run() {
 	}
 }
 
-// SetLogger sets the bots logger to a custom one
+// SetLogger sets the bot's logger to a custom one
 func (b *Bot) SetLogger(l *log.Logger) {
 	b.logger = l
 }
@@ -207,4 +244,9 @@ func msgLen(msg interface{}) (msgLen int) {
 		msgLen = len(fmt.Sprintf("%#v", m))
 	}
 	return
+}
+
+// Stop stops the bot
+func (b *Bot) Stop() {
+	_ = b.RTM.Disconnect()
 }
