@@ -5,7 +5,7 @@ import (
 
 	"context"
 
-	slack "github.com/nlopes/slack"
+	slack "github.com/slack-go/slack"
 )
 
 type contextKey string

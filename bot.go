@@ -1,5 +1,5 @@
 // Package slackbot hopes to ease development of Slack bots by adding helpful
-// methods and a mux-router style interface to the github.com/nlopes/slack package.
+// methods and a mux-router style interface to the github.com/slack-go/slack package.
 //
 // Incoming Slack RTM events are mapped to a handler in the following form:
 // 	bot.Hear("(?i)how are you(.*)").MessageHandler(HowAreYouHandler)
@@ -25,14 +25,14 @@
 //		bot.ReplyWithAttachments(evt, attachments, slackbot.WithTyping)
 //	}
 //
-// The slackbot package exposes  github.com/nlopes/slack RTM and Client objects
+// The slackbot package exposes  github.com/slack-go/slack RTM and Client objects
 // enabling a consumer to interact with the lower level package directly:
 // 	func HowAreYouHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 // 		bot.RTM.NewOutgoingMessage("Hello", "#random")
 // 	}
 //
 //
-// Project home and samples: https://github.com/BeepBoopHQ/go-slackbot
+// Project home and samples: https://github.com/lusis/go-slackbot
 package slackbot
 
 import (
@@ -42,7 +42,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 const (
@@ -169,10 +169,7 @@ func (b *Bot) Reply(evt *slack.MessageEvent, msg string, typing bool) {
 
 // ReplyWithAttachments replys to a message event with a Slack Attachments message.
 func (b *Bot) ReplyWithAttachments(evt *slack.MessageEvent, attachments []slack.Attachment, typing bool) {
-	params := slack.PostMessageParameters{AsUser: true}
-	params.Attachments = attachments
-
-	_, _, _ = b.Client.PostMessage(evt.Msg.Channel, "", params)
+	_, _, _ = b.Client.PostMessage(evt.Msg.Channel, slack.MsgOptionAsUser(true), slack.MsgOptionAttachments(attachments...))
 }
 
 // Type sends a typing message and simulates delay (max 2000ms) based on message size.

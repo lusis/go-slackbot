@@ -3,7 +3,7 @@ package slackbot
 import (
 	"context"
 
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 const (
